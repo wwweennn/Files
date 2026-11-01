@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>我的账本</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f7fb;--white:#fff;--ink:#1f1d2b;--soft:#8a8a9e;--line:#eeeef4;
+  --pur:#8b6cf6;--purSoft:#f1edff;
+  --f:"Poppins","Noto Sans SC",-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font:14px/1.5 var(--f);color:var(--ink);background:var(--white);display:flex}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--pur);outline-offset:2px}
+
+/* sidebar */
+aside{width:236px;flex:none;border-right:1px solid var(--line);display:flex;flex-direction:column;padding:26px 18px 18px;background:var(--white)}
+.logo{display:flex;align-items:center;gap:10px;padding:0 8px 30px;font-weight:700;font-size:19px}
+.logo i{width:30px;height:30px;border-radius:9px;background:var(--pur);display:grid;place-items:center;color:#fff;font-style:normal;font-size:15px}
+nav{flex:1;overflow:auto;scrollbar-width:thin}
+.gl{font-size:12px;color:var(--soft);padding:14px 12px 6px}
+.nav{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:10px 12px;border-radius:10px;cursor:pointer;text-align:left;color:#5b5a6e;font-size:14px;margin-bottom:2px}
+.nav:hover{background:var(--bg);color:var(--ink)}
+.nav.on{background:var(--pur);color:#fff;box-shadow:0 6px 16px -6px rgba(139,108,246,.7)}
+.nav .ic{width:18px;height:18px;flex:none;display:grid;place-items:center}
+.nav .ic svg{width:18px;height:18px}
+.nav .dot{width:8px;height:8px;border-radius:50%;flex:none;margin:0 5px}
+.nav.on .dot{background:#fff!important}
+.nav span.t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tools{border-top:1px solid var(--line);padding-top:12px;margin-top:8px}
+
+/* main */
+main{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--white)}
+.top{display:flex;align-items:center;gap:20px;padding:22px 32px 16px}
+.top h1{margin:0;font-size:22px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.search{flex:1;max-width:380px;margin:0 auto;position:relative}
+.search input[type=text]{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 14px 11px 42px;font:inherit;outline:none;box-shadow:0 4px 14px -8px rgba(31,29,43,.12)}
+.search input[type=text]:focus{border-color:var(--pur)}
+.search svg{position:absolute;left:14px;top:12px;width:18px;height:18px;color:var(--soft)}
+.results{position:absolute;top:48px;left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 30px -10px rgba(31,29,43,.2);padding:6px;display:none;z-index:5}
+.results.show{display:block}
+.results button{display:flex;gap:10px;align-items:center;width:100%;border:0;background:none;padding:9px 10px;border-radius:8px;cursor:pointer;text-align:left}
+.results button:hover{background:var(--bg)}
+.ibtn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:#fff;cursor:pointer;display:grid;place-items:center;color:#5b5a6e;text-decoration:none;flex:none}
+.ibtn:hover{color:var(--pur);border-color:var(--pur)}
+.ibtn svg{width:18px;height:18px}
+.sub{display:flex;align-items:center;gap:12px;padding:0 32px 14px;flex-wrap:wrap}
+.sub h2{margin:0;font-size:17px;font-weight:600}
+.seg{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:10px;overflow-x:auto}
+.seg button{border:0;background:none;padding:5px 14px;border-radius:7px;cursor:pointer;color:var(--soft);font-size:13px;white-space:nowrap}
+.seg button.on{background:#fff;color:var(--pur);font-weight:600;box-shadow:0 2px 6px -2px rgba(31,29,43,.15)}
+.chip{font-size:12px;color:var(--soft);border:1px solid var(--line);border-radius:8px;padding:4px 10px}
+.wrap{flex:1;min-height:0;padding:0 32px 26px;display:flex}
+.panel{flex:1;border:1px solid var(--line);border-radius:16px;overflow:hidden;position:relative;box-shadow:0 8px 24px -14px rgba(31,29,43,.18)}
+iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+
+/* home */
+.home{flex:1;overflow:auto;padding:0 32px 30px}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:26px}
+.stat{border:1px solid var(--line);border-radius:16px;padding:18px 20px;box-shadow:0 8px 24px -16px rgba(31,29,43,.18)}
+.stat small{color:var(--soft);font-size:12.5px}
+.stat b{display:block;font-size:26px;font-weight:600;margin-top:6px}
+.sec{display:flex;align-items:center;justify-content:space-between;margin:6px 0 14px}
+.sec h2{margin:0;font-size:17px;font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-bottom:28px}
+.card{border:1px solid var(--line);border-radius:16px;padding:18px 20px;cursor:pointer;background:#fff;text-align:left;display:flex;flex-direction:column;gap:14px;box-shadow:0 8px 24px -16px rgba(31,29,43,.18);transition:box-shadow .15s,border-color .15s}
+.card:hover{border-color:#d9d0fd;box-shadow:0 12px 28px -14px rgba(139,108,246,.45)}
+.card .h{display:flex;align-items:center;gap:12px}
+.card .badge{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;flex:none}
+.card .badge svg{width:22px;height:22px}
+.card b{font-size:15px;font-weight:600;display:block}
+.card small{color:var(--soft);font-size:12.5px}
+.card .tags{display:flex;gap:6px;flex-wrap:wrap}
+.card .tags span{font-size:12px;background:var(--bg);border-radius:6px;padding:3px 8px;color:#5b5a6e}
+.card .st{font-size:12px;display:flex;align-items:center;gap:6px;color:#2fa36b}
+.card .st.no{color:var(--soft)}
+.card.add{border-style:dashed;align-items:center;justify-content:center;color:var(--soft);box-shadow:none;min-height:130px}
+.card.add:hover{color:var(--pur)}
+.empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:var(--soft);padding:24px}
+.empty b{display:block;color:var(--ink);font-size:17px;font-weight:600;margin-bottom:4px}
+.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 16px;cursor:pointer;text-decoration:none;display:inline-block}
+.btn.pri{background:var(--pur);border-color:var(--pur);color:#fff;font-weight:500;box-shadow:0 6px 16px -6px rgba(139,108,246,.7)}
+.btn.del{color:#e0566b}
+.empty .btn{margin-top:14px}
+
+/* modal */
+.mask{position:fixed;inset:0;background:rgba(31,29,43,.35);display:none;align-items:center;justify-content:center;z-index:10;padding:16px}
+.mask.show{display:flex}
+.modal{background:#fff;border-radius:18px;width:500px;max-width:100%;max-height:90vh;overflow:auto;padding:26px}
+.modal h3{margin:0;font-size:19px;font-weight:600}
+label{display:block;font-size:13px;color:var(--soft);margin:16px 0 6px}
+input[type=text],input[type=password],select,textarea{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;outline:none;color:var(--ink)}
+input[type=text]:focus,input[type=password]:focus,select:focus,textarea:focus{border-color:var(--pur)}
+textarea{min-height:110px;font-size:12px}
+.colors{display:flex;gap:10px;flex-wrap:wrap}
+.colors button{width:28px;height:28px;border-radius:50%;border:0;cursor:pointer}
+.colors button.on{outline:2px solid var(--ink);outline-offset:2px}
+.trow{display:flex;gap:6px;margin-bottom:6px}
+.trow input:first-child{flex:.55}
+.trow button{border:0;background:var(--bg);border-radius:8px;width:38px;cursor:pointer}
+.hint{font-size:12.5px;color:var(--soft);margin-top:6px}
+.foot{display:flex;gap:8px;margin-top:24px;align-items:center}
+.sp{flex:1}
+.link{border:0;background:none;color:var(--pur);cursor:pointer;padding:6px 0}
+.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,20px);background:var(--ink);color:#fff;padding:10px 18px;border-radius:12px;font-size:13.5px;opacity:0;transition:.2s;pointer-events:none;z-index:20}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.viewonly .edit-only{display:none!important}
+@media(max-width:820px){
+  body{flex-direction:column}
+  aside{width:auto;border-right:0;border-bottom:1px solid var(--line);padding:12px 12px 8px;flex-direction:column}
+  .logo{padding:0 4px 10px}
+  nav{display:flex;gap:6px;overflow-x:auto}
+  .gl{display:none}.nav{width:auto;white-space:nowrap;flex:none}
+  .tools{display:flex;gap:6px;border:0;padding:6px 0 0;margin:0;overflow-x:auto}.tools .nav{width:auto;flex:none}
+  .top{padding:14px 16px 10px;flex-wrap:wrap}.search{order:3;max-width:none;flex-basis:100%}
+  .sub,.wrap,.home{padding-left:16px;padding-right:16px}
+  .stats{grid-template-columns:repeat(3,1fr);gap:8px}.stat{padding:12px}.stat b{font-size:20px}.stat small{font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="logo"><i>账</i><span id="brand">我的账本</span></div>
+  <nav id="nav" aria-label="文件"></nav>
+  <div class="tools">
+    <button class="nav" id="loginBtn" style="display:none"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="t">登入编辑</span></button>
+    <button class="nav edit-only" id="addBtn"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span><span class="t">加文件</span></button>
+    
+    <button class="nav edit-only" id="cfgBtn"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span><span class="t">设定</span></button>
+    <button class="nav" id="logoutBtn" style="display:none"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l-5-5 5-5M5 12h11"/></svg></span><span class="t">退出编辑</span></button>
+  </div>
+</aside>
+
+<main>
+  <div class="top">
+    <h1 id="title"></h1>
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="text" id="q" placeholder="搜索文件" autocomplete="off">
+      <div class="results" id="results"></div>
+    </div>
+    <div id="topBtns" style="display:flex;gap:8px"></div>
+  </div>
+  <div id="content" style="flex:1;min-height:0;display:flex;flex-direction:column"></div>
+</main>
+
+<!-- 加 / 编辑文件 -->
+<div class="mask" id="fileMask"><div class="modal" id="fileModal">
+  <h3 id="fmTitle">加一个文件</h3>
+  <label for="fName">名字</label><input type="text" id="fName" placeholder="例：每周账单">
+  <label for="fUrl">Google Sheets 网址</label><input type="text" id="fUrl" placeholder="https://docs.google.com/spreadsheets/d/…">
+  <div class="hint">打开那个 Google Sheets，copy 浏览器上面的网址贴进来。</div>
+  <label for="fGroup">分组</label><input type="text" id="fGroup" list="groupList" placeholder="例：每周">
+  <datalist id="groupList"></datalist>
+  <label>颜色</label><div class="colors" id="fColors"></div>
+  <label>快捷 tab（可以不填）</label>
+  <div id="fTabs"></div>
+  <button class="link" id="addTabRow" type="button">＋ 加一个快捷 tab</button>
+  <div class="hint">在 Google Sheets 点去那个 tab，copy 网址（最后有 #gid=…），贴在右边。</div>
+  <div class="foot">
+    <button class="btn del" id="fDel">删除</button>
+    <span class="sp"></span>
+    <button class="btn" data-close>取消</button>
+    <button class="btn pri" id="fSave">保存</button>
+  </div>
+</div></div>
+
+<!-- 设定 -->
+<div class="mask" id="cfgMask"><div class="modal">
+  <h3>设定</h3>
+  <label for="cName">名字</label><input type="text" id="cName">
+  <label for="cMode">文件打开方式</label>
+  <select id="cMode">
+    <option value="embed">在这个页面里打开</option>
+    <option value="newtab">在新的浏览器 tab 打开</option>
+  </select>
+  <div class="hint">文件显示不出来（空白或一直叫你登入）就改成「新的浏览器 tab」。</div>
+  <label for="cJson">备份（换电脑时贴回这里，按「导入」）</label>
+  <textarea id="cJson"></textarea>
+  <div class="foot">
+    <button class="btn" id="cCopy">复制备份</button>
+    <button class="btn" id="cImport">导入</button>
+    <span class="sp"></span>
+    <button class="btn" data-close>关闭</button>
+    <button class="btn pri" id="cSave">保存</button>
+  </div>
+</div></div>
+
+<div class="mask" id="loginMask"><div class="modal" style="width:400px">
+  <h3>登入编辑</h3>
+  <div class="hint" style="margin-top:4px">登入后可以加文件、改名字和网址。只看的话不用登入。</div>
+  <label for="lKey">编辑密码</label><input type="password" id="lKey" autocomplete="current-password">
+  <div class="hint" id="lErr" style="color:#e0566b"></div>
+  <div class="foot"><span class="sp"></span><button class="btn" data-close>取消</button><button class="btn pri" id="lGo">登入</button></div>
+</div></div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ================== 只要改这一行 ==================
+   把 Google Apps Script 部署后的网址贴在两个 ' ' 中间 */
+const API_URL='';
+/* ================================================== */
+const COLORS=['#8b6cf6','#f07c9a','#f5c451','#4cc3a5','#5b9cf5','#f59a5b','#a0a3b8','#2fb5c9'];
+const KEY='sheetsHub.v2';
+let S={name:'我的账本',mode:'embed',files:[]};
+let editKey='';
+try{editKey=localStorage.getItem(KEY+'.key')||''}catch(e){}
+try{const c=JSON.parse(localStorage.getItem(KEY+'.cache'));if(c&&Array.isArray(c.files))S=c}catch(e){}
+let loaded=!!(S.files.length);
+const canEdit=()=>!API_URL||!!editKey;
+let cur=null,curTab=null,editing=null,pickColor=COLORS[0];
+try{const last=JSON.parse(localStorage.getItem(KEY+'.last')||'null');if(last&&S.files.some(f=>f.id===last))cur=last}catch(e){}
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function cache(){try{localStorage.setItem(KEY+'.cache',JSON.stringify(S))}catch(e){}}
+/* 从 Google 读目录 */
+async function pull(quiet){
+  if(!API_URL){loaded=true;return render()}
+  try{
+    const r=await fetch(API_URL,{cache:'no-store'});const j=await r.json();
+    if(!j.ok)throw new Error(j.error||'读取失败');
+    if(j.data&&Array.isArray(j.data.files))S=j.data;
+    loaded=true;cache();render();
+  }catch(e){loaded=true;render();if(!quiet)toast('连不上目录，显示的是上次的资料')}
+}
+/* 存去 Google */
+async function save(){
+  cache();
+  if(!API_URL)return true;
+  try{
+    const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({key:editKey,data:S})});
+    const j=await r.json();
+    if(!j.ok){
+      if(j.error==='密码不对'){logout();toast('编辑密码不对，请重新登入')}
+      else toast('没有保存：'+(j.error||'未知问题'));
+      pull(true);return false;
+    }
+    return true;
+  }catch(e){toast('没有保存：连不上网络，请再试一次');pull(true);return false}
+}
+function logout(){editKey='';try{localStorage.removeItem(KEY+'.key')}catch(e){};applyMode();render()}
+function applyMode(){document.body.classList.toggle('viewonly',!canEdit());$('#loginBtn').style.display=(API_URL&&!canEdit())?'':'none';$('#logoutBtn').style.display=(API_URL&&canEdit())?'':'none'}
+function saveLast(){try{localStorage.setItem(KEY+'.last',JSON.stringify(cur))}catch(e){}}
+function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),1700)}
+function groups(list){const m=new Map();list.forEach(f=>{const g=f.group||'其他';if(!m.has(g))m.set(g,[]);m.get(g).push(f)});return m}
+function embedUrl(u){
+  const m=(u||'').match(/^(https:\/\/docs\.google\.com\/spreadsheets\/d\/[^/?#]+)/);
+  if(!m)return u;
+  const gid=(u.match(/[#&?]gid=(\d+)/)||[])[1];
+  return m[1]+'/edit?rm=minimal'+(gid?'#gid='+gid:'');
+}
+
+const ICON={
+ home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>',
+ sheet:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="M4 9h16M4 15h16M10 9v12"/></svg>',
+ ext:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/></svg>',
+ edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z"/></svg>'
+};
+const tint=c=>c+'1f';
+
+function renderNav(){
+  let h=`<button class="nav ${cur?'':'on'}" data-home><span class="ic">${ICON.home}</span><span class="t">首页</span></button>`;
+  for(const [g,fs] of groups(S.files)){
+    h+=`<div class="gl">${esc(g)}</div>`;
+    fs.forEach(f=>h+=`<button class="nav ${cur===f.id?'on':''}" data-id="${f.id}" title="${esc(f.name)}"><span class="dot" style="background:${f.color}"></span><span class="t">${esc(f.name)}</span></button>`);
+  }
+  $('#nav').innerHTML=h;
+  $('#brand').textContent=S.name;
+}
+
+function renderIndex(){
+  $('#title').textContent='首页';
+  $('#topBtns').innerHTML='';
+  const n=S.files.length,ready=S.files.filter(f=>f.url).length,gs=groups(S.files);
+  let h=`<div class="home">
+    <div class="stats">
+      <div class="stat"><small>全部文件</small><b>${n}</b></div>
+      <div class="stat"><small>分组</small><b>${gs.size}</b></div>
+      <div class="stat"><small>已连接 Google Sheets</small><b>${ready}<span style="font-size:15px;color:var(--soft);font-weight:500"> / ${n}</span></b></div>
+    </div>`;
+  if(!n)h+=`<div class="sec"><h2>${loaded?'还没有文件':'载入中…'}</h2></div>`;
+  for(const [g,fs] of gs){
+    h+=`<div class="sec"><h2>${esc(g)}</h2><span class="chip">${fs.length} 个文件</span></div><div class="grid">`;
+    fs.forEach(f=>{
+      const k=(f.tabs||[]).filter(t=>t.n);
+      h+=`<button class="card" data-id="${f.id}">
+        <span class="h"><span class="badge" style="background:${tint(f.color)};color:${f.color}">${ICON.sheet}</span><span><b>${esc(f.name)}</b><small>Google Sheets</small></span></span>
+        ${k.length?`<span class="tags">${k.map(t=>`<span>${esc(t.n)}</span>`).join('')}</span>`:''}
+        <span class="st ${f.url?'':'no'}">● ${f.url?'已连接':(canEdit()?'还没放网址':'准备中')}</span></button>`;
+    });
+    h+=`<button class="card add edit-only" data-add="${esc(g)}">＋ 加文件</button></div>`;
+  }
+  if(!n)h+=`<div class="grid"><button class="card add edit-only" data-add="">＋ 加文件</button></div>`;
+  $('#content').innerHTML=h+'</div>';
+}
+
+function renderFile(){
+  const f=S.files.find(x=>x.id===cur);
+  if(!f){cur=null;return render()}
+  const tabs=(f.tabs||[]).filter(t=>t.n);
+  const target=curTab!=null&&tabs[curTab]&&tabs[curTab].u?tabs[curTab].u:f.url;
+  $('#title').textContent=f.name;
+  $('#topBtns').innerHTML=`<button class="ibtn edit-only" id="editBtn" title="编辑这个文件" aria-label="编辑这个文件">${ICON.edit}</button>
+    ${target?`<a class="ibtn" href="${esc(target)}" target="_blank" rel="noopener" title="在新 tab 打开" aria-label="在新 tab 打开">${ICON.ext}</a>`:''}`;
+  let b;
+  if(!f.url)b=`<div class="empty"><div><b>这个文件还没放网址</b>${canEdit()?'放了网址就能在这里打开。':'很快就会加上。'}<br><button class="btn pri edit-only" id="editBtn2">放网址</button></div></div>`;
+  else if(S.mode==='newtab')b=`<div class="empty"><div><b>${esc(f.name)}</b>会在新的浏览器 tab 打开。<br><a class="btn pri" href="${esc(target)}" target="_blank" rel="noopener">打开 ${esc(f.name)}</a></div></div>`;
+  else b=`<iframe src="${esc(embedUrl(target))}" title="${esc(f.name)}"></iframe>`;
+  $('#content').innerHTML=`<div class="sub"><h2 style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:50%;background:${f.color}"></span>${esc(f.group||'其他')}</h2>
+    ${tabs.length?`<div class="seg"><button class="${curTab==null?'on':''}" data-t="-1">全部</button>${tabs.map((t,i)=>`<button class="${curTab===i?'on':''}" data-t="${i}">${esc(t.n)}</button>`).join('')}</div>`:''}</div>
+    <div class="wrap"><div class="panel">${b}</div></div>`;
+}
+
+/* 搜索 */
+$('#q').addEventListener('input',()=>{
+  const q=$('#q').value.trim().toLowerCase(),r=$('#results');
+  if(!q){r.classList.remove('show');return}
+  const hits=S.files.filter(f=>f.name.toLowerCase().includes(q)||(f.group||'').toLowerCase().includes(q));
+  r.innerHTML=hits.length?hits.map(f=>`<button data-id="${f.id}"><span style="width:8px;height:8px;border-radius:50%;background:${f.color}"></span>${esc(f.name)}<span style="margin-left:auto;color:var(--soft);font-size:12px">${esc(f.group||'')}</span></button>`).join(''):'<div style="padding:10px;color:var(--soft)">找不到这个文件</div>';
+  r.classList.add('show');
+});
+document.addEventListener('click',e=>{if(!e.target.closest('.search')){$('#results').classList.remove('show')}});
+
+function render(){renderNav();cur?renderFile():renderIndex();saveLast();document.title=S.name}
+function open(id){cur=id;curTab=null;render()}
+
+/* ---------- 事件 ---------- */
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-id],[data-home],[data-t],[data-add],#addBtn,#editBtn,#editBtn2,#cfgBtn,#loginBtn,#logoutBtn');
+  if(!t)return;
+  if(t.dataset.home!=null){cur=null;return render()}
+  if(t.dataset.t!=null){curTab=+t.dataset.t<0?null:+t.dataset.t;return renderFile()}
+  if(t.dataset.id){$('#q').value='';$('#results').classList.remove('show');return open(t.dataset.id)}
+  if(t.dataset.add!=null)return openEditor(null,t.dataset.add);
+  if(t.id==='addBtn')return openEditor(null);
+  if(t.id==='editBtn'||t.id==='editBtn2')return openEditor(cur);
+  if(t.id==='cfgBtn')return openCfg();
+  if(t.id==='loginBtn'){$('#lKey').value='';$('#lErr').textContent='';$('#loginMask').classList.add('show');setTimeout(()=>$('#lKey').focus(),50);return}
+  if(t.id==='logoutBtn'){logout();toast('已退出编辑');return}
+});
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>b.closest('.mask').classList.remove('show'));
+document.querySelectorAll('.mask').forEach(m=>m.onclick=e=>{if(e.target===m)m.classList.remove('show')});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.mask.show').forEach(m=>m.classList.remove('show'))});
+
+/* ---------- 编辑文件 ---------- */
+function tabRow(t={n:'',u:''}){const d=document.createElement('div');d.className='trow';
+  d.innerHTML=`<input type="text" placeholder="例：Total" value="${esc(t.n)}"><input type="text" placeholder="那个 tab 的网址" value="${esc(t.u)}"><button type="button" aria-label="删掉这个快捷 tab">✕</button>`;
+  d.querySelector('button').onclick=()=>d.remove();return d}
+function drawColors(){$('#fColors').innerHTML=COLORS.map(c=>`<button type="button" style="background:${c}" class="${c===pickColor?'on':''}" data-c="${c}" aria-label="颜色"></button>`).join('');}
+$('#fColors').onclick=e=>{if(e.target.dataset.c){pickColor=e.target.dataset.c;drawColors()}};
+function openEditor(id,grp){
+  editing=id;const f=S.files.find(x=>x.id===id)||{name:'',url:'',group:grp||'',color:COLORS[S.files.length%COLORS.length],tabs:[]};
+  $('#fmTitle').textContent=id?'编辑文件':'加一个文件';
+  $('#fName').value=f.name;$('#fUrl').value=f.url;$('#fGroup').value=f.group||'';
+  $('#groupList').innerHTML=[...new Set(S.files.map(x=>x.group).filter(Boolean))].map(g=>`<option value="${esc(g)}">`).join('');
+  pickColor=f.color;drawColors();
+  const box=$('#fTabs');box.innerHTML='';(f.tabs||[]).forEach(t=>box.appendChild(tabRow(t)));
+  const d=$('#fDel');d.style.display=id?'':'none';d.dataset.sure='';d.textContent='删除';
+  $('#fileMask').classList.add('show');setTimeout(()=>$('#fName').focus(),50);
+}
+$('#addTabRow').onclick=()=>$('#fTabs').appendChild(tabRow());
+$('#fSave').onclick=async()=>{
+  const name=$('#fName').value.trim();if(!name){toast('先填名字');$('#fName').focus();return}
+  const data={name,url:$('#fUrl').value.trim(),group:$('#fGroup').value.trim()||'其他',color:pickColor,
+    tabs:[...$('#fTabs').children].map(r=>{const i=r.querySelectorAll('input');return{n:i[0].value.trim(),u:i[1].value.trim()}}).filter(t=>t.n)};
+  if(editing)Object.assign(S.files.find(x=>x.id===editing),data);
+  else{const id=Date.now().toString(36);S.files.push({id,...data});cur=id;curTab=null}
+  $('#fileMask').classList.remove('show');render();if(await save())toast('已保存');
+};
+$('#fDel').onclick=async()=>{
+  const d=$('#fDel');
+  if(d.dataset.sure!=='1'){d.dataset.sure='1';d.textContent='再按一次删除';return}
+  S.files=S.files.filter(x=>x.id!==editing);cur=null;$('#fileMask').classList.remove('show');render();if(await save())toast('已删除');
+};
+
+/* ---------- 设定 ---------- */
+function openCfg(){$('#cName').value=S.name;$('#cMode').value=S.mode;$('#cJson').value=JSON.stringify(S);$('#cfgMask').classList.add('show')}
+$('#cSave').onclick=async()=>{S.name=$('#cName').value.trim()||'我的账本';S.mode=$('#cMode').value;$('#cfgMask').classList.remove('show');render();if(await save())toast('已保存')};
+$('#cCopy').onclick=()=>{const t=$('#cJson');t.select();(navigator.clipboard?navigator.clipboard.writeText(t.value):Promise.reject()).then(()=>toast('已复制备份'),()=>{document.execCommand('copy');toast('已复制备份')})};
+$('#cImport').onclick=async()=>{let d;try{d=JSON.parse($('#cJson').value);if(!Array.isArray(d.files))throw 0}catch(e){toast('备份格式不对，没有导入');return}S=d;$('#cfgMask').classList.remove('show');cur=null;render();if(await save())toast('已导入')};
+
+/* ---------- 登入编辑 ---------- */
+$('#lGo').onclick=async()=>{
+  const k=$('#lKey').value;if(!k){$('#lErr').textContent='请输入编辑密码';return}
+  $('#lGo').disabled=true;$('#lErr').textContent='检查中…';
+  try{
+    const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({key:k,check:true})});
+    const j=await r.json();
+    if(j.ok){editKey=k;try{localStorage.setItem(KEY+'.key',k)}catch(e){};$('#loginMask').classList.remove('show');applyMode();render();toast('已进入编辑模式')}
+    else $('#lErr').textContent=j.error==='密码不对'?'密码不对，再试一次':(j.error||'登入失败');
+  }catch(e){$('#lErr').textContent='连不上网络，请再试一次'}
+  $('#lGo').disabled=false;
+};
+$('#lKey').addEventListener('keydown',e=>{if(e.key==='Enter')$('#lGo').click()});
+window.addEventListener('focus',()=>{if(API_URL&&!document.querySelector('.mask.show'))pull(true)});
+
+applyMode();
+render();
+pull();
+</script>
+</body>
+</html>
